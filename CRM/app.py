@@ -4,24 +4,30 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-model = joblib.load("extra_trees_credit_model.pkl")
-encoder = {
-    col: joblib.load(f"{col}_encoder.pkl")
-    for col in ["Sex", "Housing", "Saving accounts", "Checking account"]
-}
+# Load model
+model = joblib.load("CRM/extra_trees_credit_model.pkl")
 
+# Load encoders from CRM folder
+encoder = {
+    "Sex": joblib.load("CRM/Sex_encoder.pkl"),
+    "Housing": joblib.load("CRM/Housing_encoder.pkl"),
+    "Saving accounts": joblib.load("CRM/Saving accounts_encoder.pkl"),
+    "Checking account": joblib.load("CRM/Checking account_encoder.pkl")
+}
 
 st.title("Credit Risk Prediction App")
 st.write("Enter applicant information to predict if the credit risk is good or bad.")
+
 age = st.number_input("Age", min_value=18, max_value=80, value=30)
 sex = st.selectbox("Sex", ["male", "female"])
 job = st.number_input("Job (0-3)", min_value=0, max_value=3, value=1)
 housing = st.selectbox("Housing", ["own", "rent", "free"])
-saving_accounts = st.selectbox("Saving Accounts", ["little", "moderate", "rich","quite rich"])
+saving_accounts = st.selectbox("Saving Accounts", ["little", "moderate", "rich", "quite rich"])
 checking_account = st.selectbox("Checking Accounts", ["little", "moderate", "rich"])
 credit_amount = st.number_input("Credit Amount", min_value=0, value=1000)
 duration = st.number_input("Duration (months)", min_value=1, value=12)
 
+# Create input DataFrame
 input_df = pd.DataFrame({
     "Age": [age],
     "Sex": [encoder["Sex"].transform([sex])[0]],
@@ -39,4 +45,4 @@ if st.button("Predict Credit Risk"):
     if pred == 1:
         st.success("The credit risk is predicted to be GOOD (Lower Risk).")
     else:
-        st.error("The credit risk is predicted to be BAD (Higher Risk).")  
+        st.error("The credit risk is predicted to be BAD (Higher Risk).")
